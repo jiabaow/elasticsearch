@@ -65,6 +65,35 @@ public class ThreadPoolTests extends ESTestCase {
         assertThat(ThreadPool.oneEighthAllocatedProcessors(32), equalTo(4));
     }
 
+    public void testHalfAllocatedProcessorsMaxFiveByBelowOneShouldBeOne() {
+        assertThat(ThreadPool.halfAllocatedProcessorsMaxFive(0), equalTo(1));
+        assertThat(ThreadPool.halfAllocatedProcessorsMaxFive(-10), equalTo(1));
+        assertThat(ThreadPool.halfAllocatedProcessorsMaxFive(Integer.MIN_VALUE), equalTo(1));
+    }
+
+    public void testHalfAllocatedProcessorsMaxFiveByAboveTenShouldBeFive() {
+        assertThat(ThreadPool.halfAllocatedProcessorsMaxFive(11), equalTo(5));
+        assertThat(ThreadPool.halfAllocatedProcessorsMaxFive(12), equalTo(5));
+        assertThat(ThreadPool.halfAllocatedProcessorsMaxFive(Integer.MAX_VALUE - 1), equalTo(5));
+    }
+
+    public void testHalfAllocatedProcessorsMaxFiveByValidRange() {
+        assertThat(ThreadPool.halfAllocatedProcessorsMaxFive(1), equalTo(1));
+        assertThat(ThreadPool.halfAllocatedProcessorsMaxFive(2), equalTo(1));
+
+        assertThat(ThreadPool.halfAllocatedProcessorsMaxFive(3), equalTo(2));
+        assertThat(ThreadPool.halfAllocatedProcessorsMaxFive(4), equalTo(2));
+
+        assertThat(ThreadPool.halfAllocatedProcessorsMaxFive(5), equalTo(3));
+        assertThat(ThreadPool.halfAllocatedProcessorsMaxFive(6), equalTo(3));
+
+        assertThat(ThreadPool.halfAllocatedProcessorsMaxFive(7), equalTo(4));
+        assertThat(ThreadPool.halfAllocatedProcessorsMaxFive(8), equalTo(4));
+
+        assertThat(ThreadPool.halfAllocatedProcessorsMaxFive(9), equalTo(5));
+        assertThat(ThreadPool.halfAllocatedProcessorsMaxFive(10), equalTo(5));
+    }
+
     public void testAbsoluteTime() throws Exception {
         TestThreadPool threadPool = new TestThreadPool("test");
         try {
