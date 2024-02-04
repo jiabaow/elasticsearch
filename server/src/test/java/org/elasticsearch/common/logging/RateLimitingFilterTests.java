@@ -27,6 +27,109 @@ public class RateLimitingFilterTests extends ESTestCase {
         filter.start();
     }
 
+    /**
+     * Partitioning Test For RateLimitingFilter
+     *
+     *
+     * Because RateLimitingFilter works by using a lruKeyCache
+     * and the lruKeyCache has a size limited to 128,
+     * which when breached will remove the oldest entries.
+     *
+     * So, we define our partitioning as "limit(128)" of lruKeyCache
+     * We design 2 partitions:
+     * 1. size below limit (<128)
+     * 2. size above limit (>128)
+     * Also, we add some values of boundaries for our partition: 127(smaller than 1), 128(equal), 129(greater than 1)
+     *
+     * For 2 partitions, the expected behaviors are:
+     * for partition type 1 (choose 50 as input)
+     * because cache store below limit size,
+     * if we access key0, this key still in the cache, we will get deny message(rate limit)
+     *
+     * for partition type 2 (choose 150 as input)
+     * because cache store has already exceeded the limit size,
+     * the key0 will be evicted, if we access key0, this key will not in the cache, it will be allowed, we will get accept message
+     *
+     * For boundary values:
+     *
+     * boundary value 127
+     * because cache store below limit size,
+     * if we access key0, this key still in the cache, we will get deny message
+     *
+     * boundary value 128
+     * because cache store equal the limit size,
+     * if we access key0, this key still in the cache, we will get deny message
+     *
+     * boundary value 129
+     * because cache store has already exceeded the limit size,
+     * the key0 will be evicted, if we access key0, this key will not in the cache, it will be allowed, we will get accept message
+     */
+
+    public void testBelowLimit() {
+        // construct the input
+        for (int i = 0; i < 50; i++) {
+            Message message = DeprecatedMessage.of(DeprecationCategory.OTHER, "key " + i, "", "", "msg " + i);
+            assertThat("Expected key" + i + " to be accepted", filter.filter(message), equalTo(Result.ACCEPT));
+        }
+
+        // Should be rate-limited because it's still in the cache
+        Message message = DeprecatedMessage.of(DeprecationCategory.OTHER, "key 0", "", "", "msg " + 0);
+        assertThat(filter.filter(message), equalTo(Result.DENY));
+    }
+
+
+    public void testAboveLimit() {
+        // construct the input
+        for (int i = 0; i < 150; i++) {
+            Message message = DeprecatedMessage.of(DeprecationCategory.OTHER, "key " + i, "", "", "msg " + i);
+            assertThat("Expected key" + i + " to be accepted", filter.filter(message), equalTo(Result.ACCEPT));
+        }
+
+        // Should be allowed because key0 was evicted from the cache
+        Message message = DeprecatedMessage.of(DeprecationCategory.OTHER, "key 0", "", "", "msg " + 0);
+        assertThat(filter.filter(message), equalTo(Result.ACCEPT));
+    }
+
+
+    public void testBoundaryValue127() {
+        // construct the input of boundary value1 : 127
+        for (int i = 0; i < 127; i++) {
+            Message message = DeprecatedMessage.of(DeprecationCategory.OTHER, "key " + i, "", "", "msg " + i);
+            assertThat("Expected key" + i + " to be accepted", filter.filter(message), equalTo(Result.ACCEPT));
+        }
+        // Should be rate-limited because it's still in the cache
+        Message message = DeprecatedMessage.of(DeprecationCategory.OTHER, "key 0", "", "", "msg " + 0);
+        assertThat(filter.filter(message), equalTo(Result.DENY));
+    }
+
+    public void testBoundaryValue128() {
+        // construct the input of boundary value1 : 128
+        for (int i = 0; i < 128; i++) {
+            Message message = DeprecatedMessage.of(DeprecationCategory.OTHER, "key " + i, "", "", "msg " + i);
+            assertThat("Expected key" + i + " to be accepted", filter.filter(message), equalTo(Result.ACCEPT));
+        }
+        // Should be rate-limited because it's still in the cache
+        Message message = DeprecatedMessage.of(DeprecationCategory.OTHER, "key 0", "", "", "msg " + 0);
+        assertThat(filter.filter(message), equalTo(Result.DENY));
+    }
+
+    public void testBoundaryValue129() {
+        // construct the input of boundary value1 : 129
+        for (int i = 0; i < 129; i++) {
+            Message message = DeprecatedMessage.of(DeprecationCategory.OTHER, "key " + i, "", "", "msg " + i);
+            assertThat("Expected key" + i + " to be accepted", filter.filter(message), equalTo(Result.ACCEPT));
+        }
+        // Should be allowed because key0 was evicted from the cache
+        Message message = DeprecatedMessage.of(DeprecationCategory.OTHER, "key 0", "", "", "msg " + 0);
+        assertThat(filter.filter(message), equalTo(Result.ACCEPT));
+    }
+
+
+
+
+
+
+
     @After
     public void cleanup() {
         this.filter.stop();
