@@ -25,6 +25,26 @@ import java.util.function.BooleanSupplier;
 
 public class LifecycleTests extends ESTestCase {
 
+    public void stateShouldBeInitializedWhenCreate() {
+
+    }
+
+    public void canMoveToStartedWhenInitialized() {
+
+    }
+
+    public void canMoveToStoppedWhenStarted() {
+
+    }
+
+    public void canMoveToClosedWhenInitialized() {
+
+    }
+
+    public void canMoveToClosedWhenStopped() {
+
+    }
+
     public void testTransitions() {
         doTransitionTest(false);
         doTransitionTest(true);
