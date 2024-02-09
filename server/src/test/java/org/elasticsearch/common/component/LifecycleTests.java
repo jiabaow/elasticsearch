@@ -26,14 +26,37 @@ import java.util.function.BooleanSupplier;
 public class LifecycleTests extends ESTestCase {
 
     public void stateShouldBeInitializedWhenCreate() {
-
     }
 
     public void canMoveToStartedWhenInitialized() {
 
     }
 
+    public void moveToStartedReturnFalseWhenStarted() {
+
+    }
+
+    public void moveToStartedThrowsISExceptionWhenStopped() {
+
+    }
+
+    public void moveToStartedThrowsISExceptionWhenClosed() {
+
+    }
+
     public void canMoveToStoppedWhenStarted() {
+
+    }
+
+    public void moveToStoppedThrowISExceptionWhenInitialized() {
+
+    }
+
+    public void moveToStoppedReturnFalseWhenStopped() {
+
+    }
+
+    public void moveToStoppedThrowsISExceptionWhenClosed() {
 
     }
 
@@ -42,6 +65,14 @@ public class LifecycleTests extends ESTestCase {
     }
 
     public void canMoveToClosedWhenStopped() {
+
+    }
+
+    public void moveToClosedThrowsISExceptionWhenStarted() {
+
+    }
+
+    public void moveToClosedReturnFalseWhenClosed() {
 
     }
 
