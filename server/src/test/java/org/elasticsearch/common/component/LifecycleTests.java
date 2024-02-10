@@ -16,6 +16,7 @@ import org.elasticsearch.common.util.concurrent.EsExecutors;
 import org.elasticsearch.common.util.concurrent.ThreadContext;
 import org.elasticsearch.core.Releasable;
 import org.elasticsearch.test.ESTestCase;
+import org.junit.Test;
 
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
@@ -25,22 +26,38 @@ import java.util.function.BooleanSupplier;
 
 public class LifecycleTests extends ESTestCase {
 
+    @Test
     public void stateShouldBeInitializedWhenCreate() {
+        final var lifecycle = new Lifecycle();
+        assertState(lifecycle, Lifecycle.State.INITIALIZED);
     }
 
+    @Test
     public void canMoveToStartedWhenInitialized() {
-
+        final var lifecycle = new Lifecycle();
+        assertTrue(lifecycle.moveToStarted());
+        assertState(lifecycle, Lifecycle.State.STARTED);
     }
 
+    @Test
     public void moveToStartedReturnFalseWhenStarted() {
-
+        final var lifecycle = new Lifecycle();
+        lifecycle.moveToStarted();
+        assertState(lifecycle, Lifecycle.State.STARTED);
+        assertFalse(lifecycle.moveToStarted());
     }
 
-    public void moveToStartedThrowsISExceptionWhenStopped() {
-
+    @Test
+    public void moveToStartedReturnFalseWhenStopped() {
+        final var lifecycle = new Lifecycle();
+        lifecycle.moveToStarted();
+        lifecycle.moveToStopped();
+        assertState(lifecycle, Lifecycle.State.STOPPED);
+        assertFalse(lifecycle.moveToStopped());
     }
 
-    public void moveToStartedThrowsISExceptionWhenClosed() {
+    @Test
+    public void moveToStartedReturnFalseWhenClosed() {
 
     }
 
@@ -49,7 +66,6 @@ public class LifecycleTests extends ESTestCase {
     }
 
     public void moveToStoppedThrowISExceptionWhenInitialized() {
-
     }
 
     public void moveToStoppedReturnFalseWhenStopped() {
