@@ -53,43 +53,113 @@ public class LifecycleTests extends ESTestCase {
         lifecycle.moveToStarted();
         lifecycle.moveToStopped();
         assertState(lifecycle, Lifecycle.State.STOPPED);
+
+        // should we assert false for this: lifecycle.moveToStarted() instead according to the function name?
         assertFalse(lifecycle.moveToStopped());
     }
 
     @Test
-    public void moveToStartedReturnFalseWhenClosed() {
-
+    public void moveToStartedThrowsISExceptionWhenClosed() {
+        final var lifecycle = new Lifecycle();
+        lifecycle.moveToStarted();
+        lifecycle.moveToStopped();
+        lifecycle.moveToClosed();
+        assertState(lifecycle, Lifecycle.State.CLOSED);
+        try {
+            lifecycle.moveToStarted();
+            fail("Expecting a IllegalStateException");
+        } catch (IllegalStateException e) {
+            assertEquals("Expecting an exception message",
+                "Can't move to started state when closed",
+                e.getMessage());
+        }
     }
 
+    @Test
     public void canMoveToStoppedWhenStarted() {
-
+        final var lifecycle = new Lifecycle();
+        lifecycle.moveToStarted();
+        assertState(lifecycle, Lifecycle.State.STARTED);
+        assertTrue(lifecycle.moveToStopped());
+        assertState(lifecycle, Lifecycle.State.STOPPED);
     }
 
+    @Test
     public void moveToStoppedThrowISExceptionWhenInitialized() {
+        final var lifecycle = new Lifecycle();
+        try {
+            lifecycle.moveToStopped();
+            fail("Expecting a IllegalStateException");
+        } catch (IllegalStateException e) {
+            assertEquals("Expecting an exception message",
+                "Can't move to stopped state when not started",
+                e.getMessage());
+        }
     }
 
+    @Test
     public void moveToStoppedReturnFalseWhenStopped() {
-
+        final var lifecycle = new Lifecycle();
+        lifecycle.moveToStarted();
+        lifecycle.moveToStopped();
+        assertState(lifecycle, Lifecycle.State.STOPPED);
+        assertFalse(lifecycle.moveToStopped());
     }
 
+    @Test
     public void moveToStoppedThrowsISExceptionWhenClosed() {
-
+        final var lifecycle = new Lifecycle();
+        lifecycle.moveToClosed();
+        assertState(lifecycle, Lifecycle.State.CLOSED);
+        try {
+            lifecycle.moveToStopped();
+            fail("Expecting a IllegalStateException");
+        } catch (IllegalStateException e) {
+            assertEquals("Expecting an exception message",
+                "Can't move to stopped state when closed",
+                e.getMessage());
+        }
     }
 
+    @Test
     public void canMoveToClosedWhenInitialized() {
-
+        final var lifecycle = new Lifecycle();
+        assertState(lifecycle, Lifecycle.State.INITIALIZED);
+        assertTrue(lifecycle.moveToClosed());
+        assertState(lifecycle, Lifecycle.State.CLOSED);
     }
 
+    @Test
     public void canMoveToClosedWhenStopped() {
-
+        final var lifecycle = new Lifecycle();
+        lifecycle.moveToStarted();
+        lifecycle.moveToStopped();
+        assertState(lifecycle, Lifecycle.State.STOPPED);
+        assertTrue(lifecycle.moveToClosed());
+        assertState(lifecycle, Lifecycle.State.CLOSED);
     }
 
+    @Test
     public void moveToClosedThrowsISExceptionWhenStarted() {
-
+        final var lifecycle = new Lifecycle();
+        lifecycle.moveToStarted();
+        assertState(lifecycle, Lifecycle.State.STARTED);
+        try {
+            lifecycle.moveToClosed();
+            fail("Expecting a IllegalStateException");
+        } catch (IllegalStateException e) {
+            assertEquals("Expecting an exception message",
+                "Can't move directly from STARTED to CLOSED, must move to STOPPED first",
+                e.getMessage());
+        }
     }
 
+    @Test
     public void moveToClosedReturnFalseWhenClosed() {
-
+        final var lifecycle = new Lifecycle();
+        lifecycle.moveToClosed();
+        assertState(lifecycle, Lifecycle.State.CLOSED);
+        assertFalse(lifecycle.moveToClosed());
     }
 
     public void testTransitions() {
