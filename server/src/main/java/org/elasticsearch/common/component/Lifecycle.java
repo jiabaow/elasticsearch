@@ -104,7 +104,7 @@ public final class Lifecycle {
             case INITIALIZED -> true;
             case STARTED -> false;
             case STOPPED -> {
-                //assert false : "STOPPED -> STARTED";
+                assert false : "STOPPED -> STARTED";
                 throw new IllegalStateException(
                     ElasticsearchProcess.isStopping()
                         ? "Can't start lifecycle object when the Elasticsearch process is shutting down"
@@ -112,7 +112,7 @@ public final class Lifecycle {
                 );
             }
             case CLOSED -> {
-                // assert false : "CLOSED -> STARTED";
+                assert false : "CLOSED -> STARTED";
                 throw new IllegalStateException("Can't move to started state when closed");
             }
         };
@@ -130,13 +130,13 @@ public final class Lifecycle {
     public boolean canMoveToStopped() throws IllegalStateException {
         return switch (state) {
             case INITIALIZED -> {
-                //assert false : "INITIALIZED -> STOPPED";
+                assert false : "INITIALIZED -> STOPPED";
                 throw new IllegalStateException("Can't move to stopped state when not started");
             }
             case STARTED -> true;
             case STOPPED -> false;
             case CLOSED -> {
-                //assert false : "CLOSED -> STOPPED";
+                assert false : "CLOSED -> STOPPED";
                 throw new IllegalStateException("Can't move to stopped state when closed");
             }
         };
@@ -155,7 +155,7 @@ public final class Lifecycle {
         return switch (state) {
             case INITIALIZED -> true;
             case STARTED -> {
-                //assert false : "STARTED -> CLOSED";
+                assert false : "STARTED -> CLOSED";
                 throw new IllegalStateException("Can't move directly from STARTED to CLOSED, must move to STOPPED first");
             }
             case STOPPED -> true;
