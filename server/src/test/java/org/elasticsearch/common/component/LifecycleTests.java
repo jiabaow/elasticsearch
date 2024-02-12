@@ -59,20 +59,14 @@ public class LifecycleTests extends ESTestCase {
     }
 
     @Test
-    public void moveToStartedThrowsISExceptionWhenClosed() {
+    public void moveToStartedThrowsAssertionErrorExceptionWhenClosed() {
         final var lifecycle = new Lifecycle();
         lifecycle.moveToStarted();
         lifecycle.moveToStopped();
         lifecycle.moveToClosed();
         assertState(lifecycle, Lifecycle.State.CLOSED);
-        try {
-            lifecycle.moveToStarted();
-            fail("Expecting a IllegalStateException");
-        } catch (IllegalStateException e) {
-            assertEquals("Expecting an exception message",
-                "Can't move to started state when closed",
-                e.getMessage());
-        }
+        AssertionError thrown = assertThrows(AssertionError.class, lifecycle::canMoveToStarted);
+        assertEquals("CLOSED -> STARTED", thrown.getMessage());
     }
 
     @Test
@@ -85,16 +79,11 @@ public class LifecycleTests extends ESTestCase {
     }
 
     @Test
-    public void moveToStoppedThrowISExceptionWhenInitialized() {
+    public void moveToStoppedThrowAssertionErrorExceptionWhenInitialized() {
         final var lifecycle = new Lifecycle();
-        try {
-            lifecycle.moveToStopped();
-            fail("Expecting a IllegalStateException");
-        } catch (IllegalStateException e) {
-            assertEquals("Expecting an exception message",
-                "Can't move to stopped state when not started",
-                e.getMessage());
-        }
+        assertState(lifecycle, Lifecycle.State.INITIALIZED);
+        AssertionError thrown = assertThrows(AssertionError.class, lifecycle::canMoveToStopped);
+        assertEquals("INITIALIZED -> STOPPED", thrown.getMessage());
     }
 
     @Test
@@ -107,18 +96,12 @@ public class LifecycleTests extends ESTestCase {
     }
 
     @Test
-    public void moveToStoppedThrowsISExceptionWhenClosed() {
+    public void moveToStoppedThrowsAssertionErrorExceptionWhenClosed() {
         final var lifecycle = new Lifecycle();
         lifecycle.moveToClosed();
         assertState(lifecycle, Lifecycle.State.CLOSED);
-        try {
-            lifecycle.moveToStopped();
-            fail("Expecting a IllegalStateException");
-        } catch (IllegalStateException e) {
-            assertEquals("Expecting an exception message",
-                "Can't move to stopped state when closed",
-                e.getMessage());
-        }
+        AssertionError thrown = assertThrows(AssertionError.class, lifecycle::canMoveToStopped);
+        assertEquals("CLOSED -> STOPPED", thrown.getMessage());
     }
 
     @Test
@@ -140,18 +123,12 @@ public class LifecycleTests extends ESTestCase {
     }
 
     @Test
-    public void moveToClosedThrowsISExceptionWhenStarted() {
+    public void moveToClosedThrowsAssertionErrorExceptionWhenStarted() {
         final var lifecycle = new Lifecycle();
         lifecycle.moveToStarted();
         assertState(lifecycle, Lifecycle.State.STARTED);
-        try {
-            lifecycle.moveToClosed();
-            fail("Expecting a IllegalStateException");
-        } catch (IllegalStateException e) {
-            assertEquals("Expecting an exception message",
-                "Can't move directly from STARTED to CLOSED, must move to STOPPED first",
-                e.getMessage());
-        }
+        AssertionError thrown = assertThrows(AssertionError.class, lifecycle::canMoveToClosed);
+        assertEquals("STARTED -> CLOSED", thrown.getMessage());
     }
 
     @Test
