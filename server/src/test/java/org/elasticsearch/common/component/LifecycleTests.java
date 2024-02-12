@@ -59,7 +59,7 @@ public class LifecycleTests extends ESTestCase {
     }
 
     @Test
-    public void moveToStartedThrowsISExceptionWhenClosed() {
+    public void moveToStartedThrowsAssertionErrorExceptionWhenClosed() {
         final var lifecycle = new Lifecycle();
         lifecycle.moveToStarted();
         lifecycle.moveToStopped();
@@ -79,7 +79,7 @@ public class LifecycleTests extends ESTestCase {
     }
 
     @Test
-    public void moveToStoppedThrowISExceptionWhenInitialized() {
+    public void moveToStoppedThrowAssertionErrorExceptionWhenInitialized() {
         final var lifecycle = new Lifecycle();
         assertState(lifecycle, Lifecycle.State.INITIALIZED);
         AssertionError thrown = assertThrows(AssertionError.class, lifecycle::canMoveToStopped);
@@ -96,7 +96,7 @@ public class LifecycleTests extends ESTestCase {
     }
 
     @Test
-    public void moveToStoppedThrowsISExceptionWhenClosed() {
+    public void moveToStoppedThrowsAssertionErrorExceptionWhenClosed() {
         final var lifecycle = new Lifecycle();
         lifecycle.moveToClosed();
         assertState(lifecycle, Lifecycle.State.CLOSED);
@@ -123,7 +123,7 @@ public class LifecycleTests extends ESTestCase {
     }
 
     @Test
-    public void moveToClosedThrowsISExceptionWhenStarted() {
+    public void moveToClosedThrowsAssertionErrorExceptionWhenStarted() {
         final var lifecycle = new Lifecycle();
         lifecycle.moveToStarted();
         assertState(lifecycle, Lifecycle.State.STARTED);
