@@ -53,9 +53,8 @@ public class LifecycleTests extends ESTestCase {
         lifecycle.moveToStarted();
         lifecycle.moveToStopped();
         assertState(lifecycle, Lifecycle.State.STOPPED);
-
-        // should we assert false for this: lifecycle.moveToStarted() instead according to the function name?
-        assertFalse(lifecycle.moveToStopped());
+        AssertionError thrown = assertThrows(AssertionError.class, lifecycle::canMoveToStarted);
+        assertEquals("STOPPED -> STARTED", thrown.getMessage());
     }
 
     @Test
