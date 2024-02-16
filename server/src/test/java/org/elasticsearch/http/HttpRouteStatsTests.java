@@ -14,10 +14,54 @@ import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.test.ESTestCase;
 import org.elasticsearch.xcontent.ToXContentFragment;
+import org.junit.Test;
 
 import java.util.Arrays;
 
 public class HttpRouteStatsTests extends ESTestCase {
+    @Test
+    public void testMerge() {
+        long[] requestHistogram1 = {1, 2, 3};
+        long[] requestHistogram2 = {2, 3, 4};
+        long[] responseHistogram1 = {4, 5, 6};
+        long[] responseHistogram2 = {5, 6, 7};
+        long[] responseTimeHistogram1 = {7, 8, 9};
+        long[] responseTimeHistogram2 = {8, 9, 10};
+
+        HttpRouteStats stats1 = new HttpRouteStats(1, 100, requestHistogram1, 2, 200, responseHistogram1, responseTimeHistogram1);
+        HttpRouteStats stats2 = new HttpRouteStats(3, 300, requestHistogram2, 4, 400, responseHistogram2, responseTimeHistogram2);
+
+        HttpRouteStats mergedStats = HttpRouteStats.merge(stats1, stats2);
+
+        assertEquals(4, mergedStats.requestCount());
+        assertEquals(400, mergedStats.totalRequestSize());
+        assertArrayEquals(new long[]{3, 5, 7}, mergedStats.requestSizeHistogram());
+        assertEquals(6, mergedStats.responseCount());
+        assertEquals(600, mergedStats.totalResponseSize());
+        assertArrayEquals(new long[]{9, 11, 13}, mergedStats.responseSizeHistogram());
+        assertArrayEquals(new long[]{15, 17, 19}, mergedStats.responseTimeHistogram());
+    }
+
+    @Test
+    public void testEqualsAndHashCode() {
+        long[] requestHistogram1 = {1, 2, 3};
+        long[] responseHistogram1 = {4, 5, 6};
+        long[] responseTimeHistogram1 = {7, 8, 9};
+
+        HttpRouteStats stats1 = new HttpRouteStats(1, 100, requestHistogram1, 2, 200, responseHistogram1, responseTimeHistogram1);
+        HttpRouteStats stats2 = new HttpRouteStats(1, 100, requestHistogram1, 2, 200, responseHistogram1, responseTimeHistogram1);
+        HttpRouteStats stats3 = new HttpRouteStats(3, 100, requestHistogram1, 2, 200, responseHistogram1, responseTimeHistogram1);
+
+        // Test equals
+        assertEquals(stats1, stats2);
+        assertNotEquals(stats1, null);
+        assertNotEquals(stats1, "DifferentType");
+        assertNotEquals(stats1, stats3); // Different instance
+
+        // Test hashCode
+        assertEquals(stats1.hashCode(), stats2.hashCode());
+        assertNotEquals(stats1.hashCode(), stats3.hashCode()); // Different instance
+    }
 
     public void testToXContent() {
         final var requestSizeHistogram = new long[32];
