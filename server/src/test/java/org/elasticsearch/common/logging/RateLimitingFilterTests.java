@@ -37,8 +37,6 @@ public class RateLimitingFilterTests extends ESTestCase {
      *
      * So, we define our partitioning as "limit(128)" of lruKeyCache
      * We design 2 partitions:
-     * 1. size below limit (<128)
-     * 2. size above limit (>128)
      * Also, we add some values of boundaries for our partition: 127(smaller than 1), 128(equal), 129(greater than 1)
      *
      * For 2 partitions, the expected behaviors are:
