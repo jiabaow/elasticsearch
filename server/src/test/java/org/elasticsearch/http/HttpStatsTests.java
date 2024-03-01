@@ -8,21 +8,64 @@
 
 package org.elasticsearch.http;
 
+import org.elasticsearch.TransportVersion;
 import org.elasticsearch.common.Strings;
+import org.elasticsearch.common.io.stream.StreamInput;
+import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.core.Tuple;
 import org.elasticsearch.test.ESTestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class HttpStatsTests extends ESTestCase {
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
+    @Mock
+    private StreamOutput streamOutputMock;
+    @Test
+    public void testWriteTo() throws IOException {
+        StreamInput streamInputMock = mock(StreamInput.class);
+
+        when(streamInputMock.readVLong()).thenReturn(1L);
+        when(streamInputMock.readCollectionAsList(any())).thenReturn(emptyList());
+        when(streamInputMock.getTransportVersion()).thenReturn(TransportVersion.current());
+
+        HttpStats httpStats = new HttpStats(streamInputMock);
+
+        verify(streamInputMock, times(2)).readVLong();
+        verify(streamInputMock).readCollectionAsList(any());
+        verify(streamInputMock).getTransportVersion();
+
+        assertEquals(1L, httpStats.getTotalOpen());
+        assertEquals(1L, httpStats.getServerOpen());
+        assertEquals(emptyList(), httpStats.getClientStats());
+
+        when(streamOutputMock.getTransportVersion()).thenReturn(TransportVersion.current());
+
+        httpStats.writeTo(streamOutputMock);
+        verify(streamOutputMock, times(2)).writeVLong(1L);
+        verify(streamOutputMock).writeCollection(emptyList());
+    }
 
     public void testMerge() {
         var first = randomHttpStats();
