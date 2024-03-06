@@ -48,7 +48,7 @@ public class LifecycleTests extends ESTestCase {
     }
 
     @Test
-    public void moveToStartedReturnFalseWhenStopped() {
+    public void moveToStartedThrowAssertionErrorWhenStopped() {
         final var lifecycle = new Lifecycle();
         lifecycle.moveToStarted();
         lifecycle.moveToStopped();
