@@ -56,11 +56,11 @@ public class HttpRouteStatsTests extends ESTestCase {
         assertEquals(stats1, stats2);
         assertNotEquals(stats1, null);
         assertNotEquals(stats1, "DifferentType");
-        assertNotEquals(stats1, stats3); // Different instance
+        assertNotEquals(stats1, stats3);
 
         // Test hashCode
         assertEquals(stats1.hashCode(), stats2.hashCode());
-        assertNotEquals(stats1.hashCode(), stats3.hashCode()); // Different instance
+        assertNotEquals(stats1.hashCode(), stats3.hashCode());
     }
 
     public void testToXContent() {

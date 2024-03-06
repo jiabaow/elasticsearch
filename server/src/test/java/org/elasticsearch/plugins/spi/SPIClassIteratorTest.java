@@ -16,18 +16,14 @@ import static org.junit.Assert.assertTrue;
 public class SPIClassIteratorTest {
     @Test
     public void testIsParentClassLoader() {
-        // Mock ClassLoaders
         ClassLoader parentClassLoader = new ClassLoader() {};
         ClassLoader childClassLoader = new CustomClassLoader(parentClassLoader);
 
-        // Test when the child loader is a direct child of the parent
         assertTrue(SPIClassIterator.isParentClassLoader(parentClassLoader, childClassLoader));
 
-        // Test when the child loader is a grandchild of the parent
         ClassLoader grandchildClassLoader = new CustomClassLoader(childClassLoader);
         assertTrue(SPIClassIterator.isParentClassLoader(parentClassLoader, grandchildClassLoader));
 
-        // Test when the loaders are not related
         ClassLoader unrelatedClassLoader = new ClassLoader() {};
         assertFalse(SPIClassIterator.isParentClassLoader(parentClassLoader, unrelatedClassLoader));
     }
